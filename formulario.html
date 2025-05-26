@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASISTENCIA EMPAQUE</title>
+    <style>
+        body { font-family: sans-serif; padding: 1rem; max-width: 500px; margin: auto; }
+        label { display: block; margin-top: 1.2rem; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 0.5rem; font-size: 1rem; margin-top: 0.3rem; }
+        button { margin-top: 2rem; padding: 0.75rem; font-size: 1rem; width: 100%; }
+        .titulo { font-size: 1.4rem; font-weight: bold; margin-bottom: 1rem; text-align: center; }
+        .logo {
+            display: block;
+            margin: 0 auto 1rem auto;
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="titulo">ASISTENCIA EMPAQUE</div>
+    <form id="formulario">
+        <label for="nombre">1. Nombre</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Enter your answer" required>
+
+        <label>2. Entrada o Salida</label>
+        <input type="radio" id="entrada" name="tipo" value="Entrada" required>
+        <label for="entrada">Entrada</label>
+        <input type="radio" id="salida" name="tipo" value="Salida">
+        <label for="salida">Salida</label>
+
+        <label for="carton">3. #Pacas Cartón</label>
+        <input type="number" id="carton" name="carton" placeholder="Enter your answer" required>
+
+        <label for="playo">4. #Pacas Playo</label>
+        <input type="number" id="playo" name="playo" placeholder="Enter your answer" required>
+
+        <label for="comentarios">5. Comentarios (Llenar en caso de existir algún requerimiento)</label>
+        <textarea id="comentarios" name="comentarios" placeholder="Enter your answer" rows="3"></textarea>
+
+        <input type="hidden" id="tienda" name="tienda">
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const tienda = params.get("tienda") || "NO DEFINIDA";
+        document.getElementById("tienda").value = tienda;
+
+        const formulario = document.getElementById("formulario");
+        formulario.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const datos = {
+                nombre: formulario.nombre.value,
+                tipo: formulario.tipo.value,
+                carton: formulario.carton.value,
+                playo: formulario.playo.value,
+                comentarios: formulario.comentarios.value,
+                tienda: formulario.tienda.value,
+                fecha: new Date().toISOString().split('T')[0],
+                hora: new Date().toTimeString().split(' ')[0]
+            };
+
+            try {
+                await fetch("https://prod-127.westeurope.logic.azure.com:443/workflows/75ef65602d7442fca62144abac2b5493/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=CR7_uJMuztSPvoHnT7urkRyDShgSuPC6kDV0PZ5WDvg", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(datos)
+                });
+
+                alert("¡Registro enviado!");
+                formulario.reset();
+            } catch (error) {
+                alert("Error al enviar. Intenta de nuevo.");
+            }
+        });
+    </script>
+</body>
+</html>
